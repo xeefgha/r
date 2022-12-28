@@ -1,0 +1,94 @@
+# Zadanie 2
+
+Pociąg z Lublina do Warszawy przejechał połowę drogi ze średnią prędkością 120 km/h. Drugą połowę przejechał ze średnią prędkością 90 km/h. Jaka była średnia prędkość pociągu.
+
+```{r}
+v_1 <- 120
+v_2 <- 90
+v_avg <- 1 / (1/240 + 1/180)
+print(paste('Average volocity equels',v_avg))
+```
+# Zadanie 3
+
+Utwórz funkcję obliczającą współczynnik korelacji r Pearsona dla 2 wektorów o tej samej długości.
+Wczytaj dane plik dane.csv i oblicz współczynnik dla wagi i wzrostu. W komentarzu napisz co oznacza wynik.
+
+```{r}
+pearson <- function(x, y) {
+  cor.test(x, y, method='pearson')
+}
+A <- read.csv2('data/dane.csv')
+print(pearson(A$wzrost, A$waga))
+```
+Współczynnik Pearsona określa poziom zależności liniowej między zmiennymi losowymi. Im większa wartość bezwzględna współczynnika tym silniejsza zależność. Wartość dodatnia oznacza że wraz ze wzrostem wartości jednej zmiennej, w tym przypadku wzrostu, rośnie wartość drugiej zmiennej (wagi).
+
+# Zadanie 4
+
+Napisz funkcję zwracającą ramke danych z danych podanych przez użytkownika
+stworzDataFrame <- function(ile=1). W pierwszym wierszu użytkownik podaje nazwy kolumn. w kolejnych wierszach zawartość wierszy ramki danych ( tyle wierszy ile podaliśmy w argumencie ile. ile=1 oznacza, że gdy użytkownik nie poda żadnej wartości jako parametr, domyślna wartością będzie 1)
+
+```{r}
+stworzDataFrame <- function(ile=1) {
+  names_raw <- readline(prompt='Podaj nazwę kolumy: ')
+  names = strsplit(names_raw, ' ')[[1]]
+  A = data.frame()
+  for (i in 1:ile) {
+    B_raw <- readline(prompt='Podaj zawartość kolumny: ')
+    if (length(A) == 0) { 
+      A <- data.frame(strsplit(B_raw, ' ')[[1]])
+    } 
+    else {
+      A <- cbind(A, data.frame(strsplit(B_raw, ' ')[[1]]))
+    }
+  }
+  colnames(A) <- names
+  A
+}
+stworzDataFrame(3)
+```
+
+# Zadanie 5
+
+Napisz funkcję , która pobiera sciezkeKatalogu, nazweKolumny, jakaFunkcje, DlaIluPlikow i liczy: mean, median,min,max w zależności od podanej nazwy funkcji w argumencie, z katologu który podaliśmy i z tylu plików ilu podaliśmy dla wybranej nazwy kolumny. UWAGA: w podanych plikach R pobierając komórki nazwane liczbami R wstawi przed nazwy X. Funkcję przetestuj dla katalogu smogKrakow.zip.  Wykonując obliczenia pomiń brakujące wartości.
+
+liczZplikow <- function(sciezka,nazwaKolumny,jakaFunkcja="mean",DlaIluPlikow=1){}
+ 
+Lista plików w katalogu: 
+list.files(sciezka)
+ 
+Omijanie na : na.omit(myDataFrame[[nazwaKolumny]])
+
+Do złączania stringów: 
+paste("string1","string2",sep="TU WSTAW SEPARATOR")
+
+Gdy mamy, rózne oznaczenia NA w plikach możemy wykorzystać ( w tym wypadku pusty znak i NA: na.strings=c("","NA")
+
+```{r}
+liczZplikow <- function(sciezka, nazwaKolumny, jakaFunkcja='mean', dlaIluPlikow=1) {
+  fileNames <- list.files(sciezka)
+  if (dlaIluPlikow > length(fileNames)) dlaIluPlikow <- length(fileNames)
+  A <- c()
+  for (i in 1:dlaIluPlikow) {
+    fileName <- fileNames[i]
+    data = read.csv2(paste(sciezka, '/', fileName, sep=''), sep=',')
+    if (is.element(nazwaKolumny, names(data))) {
+      A <- rbind(A, data[nazwaKolumny])
+    }
+  }
+  na.strings <- c('', 'NA')
+  result <- NULL
+  B <- na.omit(A)
+  if (length(B) > 0) {
+    if (jakaFunkcja == 'mean') {result = mean(B[, 1])}
+    if (jakaFunkcja == 'median') {result = median(B[, 1])}
+    if (jakaFunkcja == 'min') {result = min(B[, 1])}
+    if (jakaFunkcja == 'max') {result = max(B[, 1])}
+  }
+  result
+}
+print(paste('Mean of 3_temperature for 2 days equels ', liczZplikow('data/smogKrakow2', 'X3_temperature', jakaFunkcja='mean', dlaIluPlikow=2)))
+print(paste('Min of 3_humidity for 5 days equels ', liczZplikow('data/smogKrakow2', 'X3_temperature', jakaFunkcja='min', dlaIluPlikow=5)))
+print(paste('Max of 3_pressure for 9 days equels ', liczZplikow('data/smogKrakow2', 'X3_temperature', jakaFunkcja='max', dlaIluPlikow=9)))
+print(paste('Median of 3_pm1 for 12 days equels ', liczZplikow('data/smogKrakow2', 'X3_temperature', jakaFunkcja='median', dlaIluPlikow=12)))
+```
+
